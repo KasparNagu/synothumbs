@@ -72,14 +72,13 @@ class convertImage(threading.Thread):
                         self.orientation = self.exif[self.orientation_key]
 
                         rotate_values = {
-                            3: 180,
-                            6: 270,
-                            8: 90
+                            3: Image.ROTATE_180,
+                            6: Image.ROTATE_270,
+                            8: Image.ROTATE_90
                         }
-
                         try:
                             if self.orientation in rotate_values:
-                                self.image=self.image.rotate(rotate_values[self.orientation])
+                                self.image=self.image.transpose(rotate_values[self.orientation])
                         except:
                             pass
 
