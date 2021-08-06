@@ -46,17 +46,25 @@ class convertImage(threading.Thread):
             print ("  [-] Now working on %s" % (self.imagePath))
             if os.path.isfile(os.path.join(self.thumbDir,xlName)) != 1:
                 if os.path.isdir(self.thumbDir) != 1:
-                    try:os.makedirs(self.thumbDir)
-                    except:continue
-
-                #Following if statements converts raw images using dcraw first
-                if os.path.splitext(self.imagePath)[1].lower() == ".cr2":
-                    self.dcrawcmd = "dcraw -c -b 8 -q 0 -w -H 5 '%s'" % self.imagePath
-                    self.dcraw_proc = subprocess.Popen(shlex.split(self.dcrawcmd), stdout=subprocess.PIPE)
-                    self.raw = StringIO(self.dcraw_proc.communicate()[0])
-                    self.image=Image.open(self.raw)
-                else:
-                    self.image=Image.open(self.imagePath)
+                    try:
+                        os.makedirs(self.thumbDir)
+                    except Exception as ex:
+                        print(ex)
+                        self.queueIMG.task_done()
+                        continue
+		try:
+		        #Following if statements converts raw images using dcraw first
+		        if os.path.splitext(self.imagePath)[1].lower() == ".cr2":
+		            self.dcrawcmd = "dcraw -c -b 8 -q 0 -w -H 5 '%s'" % self.imagePath
+		            self.dcraw_proc = subprocess.Popen(shlex.split(self.dcrawcmd), stdout=subprocess.PIPE)
+		            self.raw = StringIO(self.dcraw_proc.communicate()[0])
+		            self.image=Image.open(self.raw)
+		        else:
+		            self.image=Image.open(self.imagePath)
+		except Exception as ex:
+			print(ex)
+			self.queueIMG.task_done()
+			continue
 
                 ###### Check image orientation and rotate if necessary
                 ## code adapted from: http://www.lifl.fr/~riquetd/auto-rotating-pictures-using-pil.html
